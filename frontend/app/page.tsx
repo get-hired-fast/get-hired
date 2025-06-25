@@ -22,6 +22,14 @@ import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs"
 export default function LandingPage() {
   const { isSignedIn, user } = useUser()
 
+    // Add this inside your component to test DB connection
+useEffect(() => {
+  fetch('/api/profile')
+    .then(res => res.json())
+    .then(data => console.log('DB Test:', data))
+    .catch(err => console.error('DB Error:', err))
+}, [])
+
   const features = [
     {
       icon: <Zap className="h-8 w-8" />,
@@ -65,6 +73,8 @@ export default function LandingPage() {
       icon: <CheckCircle className="h-12 w-12" />,
     },
   ]
+
+
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
@@ -339,3 +349,7 @@ export default function LandingPage() {
     </div>
   )
 }
+function useEffect(arg0: () => void, arg1: never[]) {
+  throw new Error("Function not implemented.")
+}
+

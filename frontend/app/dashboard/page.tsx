@@ -1,14 +1,37 @@
 "use client"
 
 import { useUser } from "@clerk/nextjs"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Briefcase, Code, Trophy, Bell, Search, Plus, TrendingUp, Calendar, MapPin, Clock } from "lucide-react"
+import { Briefcase, Code, Trophy, Bell, Search, Plus, TrendingUp, Calendar, MapPin, Clock, User } from "lucide-react"
 import Link from "next/link"
 
 export default function Dashboard() {
   const { user } = useUser()
+  const [hasProfile, setHasProfile] = useState<boolean | null>(null)
+
+  useEffect(() => {
+    const checkProfile = async () => {
+      try {
+        const response = await fetch("/api/profile")
+        if (response.ok) {
+          const profile = await response.json()
+          setHasProfile(!!profile && profile.isProfileComplete)
+        } else {
+          setHasProfile(false)
+        }
+      } catch (error) {
+        console.error("Error checking profile:", error)
+        setHasProfile(false)
+      }
+    }
+
+    if (user) {
+      checkProfile()
+    }
+  }, [user])
 
   const recentOpportunities = [
     {
@@ -44,6 +67,17 @@ export default function Dashboard() {
     { label: "Saved Opportunities", value: "8", icon: <Bell className="h-5 w-5" /> },
   ]
 
+  if (hasProfile === null) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100">
       {/* Header */}
@@ -77,6 +111,30 @@ export default function Dashboard() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Welcome back, {user?.firstName || "User"}! 👋</h1>
           <p className="text-gray-600">Here's what's happening with your career journey today.</p>
         </div>
+
+        {/* Profile Creation CTA */}
+        {!hasProfile && (
+          <Card className="mb-8 border-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
+            <CardContent className="p-8">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-4">
+                  <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center">
+                    <User className="h-8 w-8" />
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold mb-2">Complete Your Profile</h3>
+                    <p className="text-blue-100">
+                      Create your professional profile to get personalized job recommendations and auto-apply features.
+                    </p>
+                  </div>
+                </div>
+                <Link href="/create-profile">
+                  <Button className="bg-white text-blue-600 hover:bg-gray-100 font-semibold">Create Profile</Button>
+                </Link>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Stats Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
@@ -117,7 +175,11 @@ export default function Dashboard() {
                 <Plus className="h-6 w-6" />
               </div>
               <p className="text-purple-100 mb-4">Keep your profile updated to get better matches.</p>
-              <Button className="bg-white text-purple-600 hover:bg-gray-100">Edit Profile</Button>
+              <Link href={hasProfile ? "/profile" : "/create-profile"}>
+                <Button className="bg-white text-purple-600 hover:bg-gray-100">
+                  {hasProfile ? "Edit Profile" : "Create Profile"}
+                </Button>
+              </Link>
             </CardContent>
           </Card>
 
@@ -128,7 +190,9 @@ export default function Dashboard() {
                 <Trophy className="h-6 w-6" />
               </div>
               <p className="text-green-100 mb-4">Let AI apply to opportunities for you automatically.</p>
-              <Button className="bg-white text-green-600 hover:bg-gray-100">Set Up</Button>
+              <Button className="bg-white text-green-600 hover:bg-gray-100" disabled={!hasProfile}>
+                {hasProfile ? "Set Up" : "Complete Profile First"}
+              </Button>
             </CardContent>
           </Card>
         </div>
