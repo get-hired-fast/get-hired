@@ -1,6 +1,5 @@
 "use client"
 
-import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -18,10 +17,10 @@ import {
   Trophy,
 } from "lucide-react"
 import Link from "next/link"
-import AuthModal from "./components/auth-modal"
+import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs"
 
 export default function LandingPage() {
-  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false)
+  const { isSignedIn, user } = useUser()
 
   const features = [
     {
@@ -87,13 +86,39 @@ export default function LandingPage() {
             <Link href="#how-it-works" className="text-gray-600 hover:text-blue-600 transition-colors">
               How it Works
             </Link>
+            {isSignedIn && (
+              <Link href="/dashboard" className="text-gray-600 hover:text-blue-600 transition-colors">
+                Dashboard
+              </Link>
+            )}
           </nav>
-          <Button
-            onClick={() => setIsAuthModalOpen(true)}
-            className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white"
-          >
-            Sign In
-          </Button>
+          <div className="flex items-center space-x-4">
+            {isSignedIn ? (
+              <div className="flex items-center space-x-3">
+                <span className="text-sm text-gray-600 hidden sm:block">Welcome, {user?.firstName || "User"}!</span>
+                <UserButton
+                  appearance={{
+                    elements: {
+                      avatarBox: "h-8 w-8",
+                    },
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="flex items-center space-x-2">
+                <SignInButton mode="modal">
+                  <Button variant="ghost" className="text-gray-600 hover:text-blue-600">
+                    Sign In
+                  </Button>
+                </SignInButton>
+                <SignUpButton mode="modal">
+                  <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+                    Get Started
+                  </Button>
+                </SignUpButton>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
@@ -118,14 +143,27 @@ export default function LandingPage() {
               the applications while you focus on what matters most.
             </p>
             <div className="flex justify-center">
-              <Button
-                size="lg"
-                className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg"
-                onClick={() => setIsAuthModalOpen(true)}
-              >
-                Get Started Free
-                <ArrowRight className="ml-2 h-5 w-5" />
-              </Button>
+              {isSignedIn ? (
+                <Link href="/dashboard">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg"
+                  >
+                    Go to Dashboard
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </Link>
+              ) : (
+                <SignUpButton mode="modal">
+                  <Button
+                    size="lg"
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white px-8 py-4 text-lg"
+                  >
+                    Get Started Free
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </Button>
+                </SignUpButton>
+              )}
             </div>
             <div className="mt-12 flex items-center justify-center space-x-8 text-sm text-gray-500">
               <div className="flex items-center space-x-2">
@@ -218,14 +256,21 @@ export default function LandingPage() {
           <p className="text-xl mb-8 max-w-2xl mx-auto opacity-90">
             Join thousands of students who are already using Helpr to discover amazing opportunities.
           </p>
-          <Button
-            size="lg"
-            className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold"
-            onClick={() => setIsAuthModalOpen(true)}
-          >
-            Get Started Today
-            <ArrowRight className="ml-2 h-5 w-5" />
-          </Button>
+          {isSignedIn ? (
+            <Link href="/dashboard">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold">
+                Go to Dashboard
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </Link>
+          ) : (
+            <SignUpButton mode="modal">
+              <Button size="lg" className="bg-white text-blue-600 hover:bg-gray-100 px-8 py-4 text-lg font-semibold">
+                Get Started Today
+                <ArrowRight className="ml-2 h-5 w-5" />
+              </Button>
+            </SignUpButton>
+          )}
         </div>
       </section>
 
@@ -291,9 +336,6 @@ export default function LandingPage() {
           </div>
         </div>
       </footer>
-
-      {/* Auth Modal */}
-      <AuthModal isOpen={isAuthModalOpen} onClose={() => setIsAuthModalOpen(false)} />
     </div>
   )
 }
