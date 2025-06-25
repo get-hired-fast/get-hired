@@ -22,14 +22,6 @@ import { SignInButton, SignUpButton, UserButton, useUser } from "@clerk/nextjs"
 export default function LandingPage() {
   const { isSignedIn, user } = useUser()
 
-    // Add this inside your component to test DB connection
-useEffect(() => {
-  fetch('/api/profile')
-    .then(res => res.json())
-    .then(data => console.log('DB Test:', data))
-    .catch(err => console.error('DB Error:', err))
-}, [])
-
   const features = [
     {
       icon: <Zap className="h-8 w-8" />,

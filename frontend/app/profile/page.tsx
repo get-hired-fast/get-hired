@@ -18,6 +18,7 @@ import {
   FileText,
   Edit,
   Download,
+  RefreshCw,
 } from "lucide-react"
 import Link from "next/link"
 import type { UserProfile } from "@/lib/types"
@@ -27,21 +28,22 @@ export default function ProfilePage() {
   const [profile, setProfile] = useState<UserProfile | null>(null)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const response = await fetch("/api/profile")
-        if (response.ok) {
-          const profileData = await response.json()
-          setProfile(profileData)
-        }
-      } catch (error) {
-        console.error("Error fetching profile:", error)
-      } finally {
-        setLoading(false)
+  const fetchProfile = async () => {
+    try {
+      setLoading(true)
+      const response = await fetch("/api/profile")
+      if (response.ok) {
+        const profileData = await response.json()
+        setProfile(profileData)
       }
+    } catch (error) {
+      console.error("Error fetching profile:", error)
+    } finally {
+      setLoading(false)
     }
+  }
 
+  useEffect(() => {
     if (user) {
       fetchProfile()
     }
@@ -144,12 +146,18 @@ export default function ProfilePage() {
                       </div>
                     </div>
                   </div>
-                  <Link href="/create-profile">
-                    <Button className="mt-4 md:mt-0 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
-                      <Edit className="h-4 w-4 mr-2" />
-                      Edit Profile
+                  <div className="flex space-x-2 mt-4 md:mt-0">
+                    <Button onClick={fetchProfile} variant="outline" size="sm" className="flex items-center">
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      Refresh
                     </Button>
-                  </Link>
+                    <Link href="/create-profile">
+                      <Button className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white">
+                        <Edit className="h-4 w-4 mr-2" />
+                        Edit Profile
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
                 {profile.bio && <p className="text-gray-700 leading-relaxed">{profile.bio}</p>}
               </div>
@@ -161,7 +169,7 @@ export default function ProfilePage() {
           {/* Left Column */}
           <div className="lg:col-span-2 space-y-8">
             {/* Skills */}
-            {profile.skills.length > 0 && (
+            {profile.skills && profile.skills.length > 0 && (
               <Card className="border-0 bg-white/80 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -182,7 +190,7 @@ export default function ProfilePage() {
             )}
 
             {/* Preferred Job Roles */}
-            {profile.preferredJobRoles.length > 0 && (
+            {profile.preferredJobRoles && profile.preferredJobRoles.length > 0 && (
               <Card className="border-0 bg-white/80 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -203,7 +211,7 @@ export default function ProfilePage() {
             )}
 
             {/* Education */}
-            {profile.education.length > 0 && (
+            {profile.education && profile.education.length > 0 && (
               <Card className="border-0 bg-white/80 backdrop-blur-sm">
                 <CardHeader>
                   <CardTitle className="flex items-center">
@@ -305,6 +313,11 @@ export default function ProfilePage() {
                       Twitter
                     </a>
                   )}
+                  {!profile.linkedinUrl &&
+                    !profile.githubUrl &&
+                    !profile.leetcodeUrl &&
+                    !profile.portfolioUrl &&
+                    !profile.twitterUrl && <p className="text-gray-500 text-sm">No social links added yet</p>}
                 </div>
               </CardContent>
             </Card>
@@ -341,15 +354,24 @@ export default function ProfilePage() {
             {/* Profile Stats */}
             <Card className="border-0 bg-gradient-to-r from-blue-600 to-purple-600 text-white">
               <CardHeader>
-                <CardTitle>Profile Completion</CardTitle>
+                <CardTitle>Profile Status</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex justify-between items-center">
                     <span>Profile Complete</span>
-                    <Badge className="bg-white text-blue-600">100%</Badge>
+                    <Badge className="bg-white text-blue-600">
+                      {profile.isProfileComplete ? "100%" : "Incomplete"}
+                    </Badge>
                   </div>
-                  <div className="text-sm opacity-90">Your profile is complete and ready to attract opportunities!</div>
+                  <div className="text-sm opacity-90">
+                    {profile.isProfileComplete
+                      ? "Your profile is complete and ready to attract opportunities!"
+                      : "Complete your profile to get better matches."}
+                  </div>
+                  <div className="text-xs opacity-75">
+                    Last updated: {new Date(profile.updatedAt).toLocaleDateString()}
+                  </div>
                 </div>
               </CardContent>
             </Card>

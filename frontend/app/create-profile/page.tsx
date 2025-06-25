@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useUser } from "@clerk/nextjs"
 import { useRouter } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -27,13 +27,96 @@ export default function CreateProfile() {
   const router = useRouter()
   const [currentStep, setCurrentStep] = useState(1)
   const [isLoading, setIsLoading] = useState(false)
+  const [isLoadingProfile, setIsLoadingProfile] = useState(true)
+  const [isEditing, setIsEditing] = useState(false)
   const [formData, setFormData] = useState<ProfileFormData>({
-    firstName: user?.firstName || "",
-    lastName: user?.lastName || "",
+    firstName: "",
+    lastName: "",
     skills: [],
     preferredJobRoles: [],
     education: [],
   })
+
+  // Load existing profile data when component mounts
+  useEffect(() => {
+    const loadExistingProfile = async () => {
+      if (!user) return
+
+      try {
+        console.log("🔍 Loading existing profile...")
+        const response = await fetch("/api/profile")
+
+        if (response.ok) {
+          const existingProfile = await response.json()
+
+          if (existingProfile && existingProfile.isProfileComplete) {
+            console.log("✅ Found existing profile:", existingProfile)
+            setIsEditing(true)
+
+            // Convert the existing profile to form data format
+            setFormData({
+              firstName: existingProfile.firstName || "",
+              lastName: existingProfile.lastName || "",
+              age: existingProfile.age || undefined,
+              dateOfBirth: existingProfile.dateOfBirth
+                ? new Date(existingProfile.dateOfBirth).toISOString().split("T")[0]
+                : "",
+              address: existingProfile.address || "",
+              city: existingProfile.city || "",
+              state: existingProfile.state || "",
+              country: existingProfile.country || "",
+              phone: existingProfile.phone || "",
+              skills: existingProfile.skills || [],
+              preferredJobRoles: existingProfile.preferredJobRoles || [],
+              bio: existingProfile.bio || "",
+              currentRole: existingProfile.currentRole || "",
+              experience: existingProfile.experience || "",
+              linkedinUrl: existingProfile.linkedinUrl || "",
+              githubUrl: existingProfile.githubUrl || "",
+              leetcodeUrl: existingProfile.leetcodeUrl || "",
+              portfolioUrl: existingProfile.portfolioUrl || "",
+              twitterUrl: existingProfile.twitterUrl || "",
+              education: existingProfile.education || [],
+              // Note: We don't load files (profilePicture, resume) as they need to be re-uploaded
+            })
+          } else {
+            console.log("📝 No existing profile found, creating new one")
+            // Set default values for new profile
+            setFormData({
+              firstName: user?.firstName || "",
+              lastName: user?.lastName || "",
+              skills: [],
+              preferredJobRoles: [],
+              education: [],
+            })
+          }
+        } else {
+          console.log("📝 No profile found, creating new one")
+          setFormData({
+            firstName: user?.firstName || "",
+            lastName: user?.lastName || "",
+            skills: [],
+            preferredJobRoles: [],
+            education: [],
+          })
+        }
+      } catch (error) {
+        console.error("❌ Error loading profile:", error)
+        // Set default values on error
+        setFormData({
+          firstName: user?.firstName || "",
+          lastName: user?.lastName || "",
+          skills: [],
+          preferredJobRoles: [],
+          education: [],
+        })
+      } finally {
+        setIsLoadingProfile(false)
+      }
+    }
+
+    loadExistingProfile()
+  }, [user])
 
   const progress = (currentStep / steps.length) * 100
 
@@ -59,7 +142,7 @@ export default function CreateProfile() {
       console.log("🚀 Starting profile submission...")
       console.log("📝 Form data:", formData)
 
-      // Upload files first
+      // Upload files first (only if new files are selected)
       let profilePictureUrl = ""
       let resumeUrl = ""
       let resumeFileName = ""
@@ -105,37 +188,45 @@ export default function CreateProfile() {
         console.log("✅ Resume uploaded:", resumeUrl)
       }
 
-      // Prepare profile data
-      const profileData = {
+      // Prepare profile data (only include fields that have values)
+      const profileData: any = {
         firstName: formData.firstName,
         lastName: formData.lastName,
-        age: formData.age || null,
-        dateOfBirth: formData.dateOfBirth || null,
-        address: formData.address || null,
-        city: formData.city || null,
-        state: formData.state || null,
-        country: formData.country || null,
-        phone: formData.phone || null,
         skills: formData.skills || [],
         preferredJobRoles: formData.preferredJobRoles || [],
-        bio: formData.bio || null,
-        currentRole: formData.currentRole || null,
-        experience: formData.experience || null,
-        linkedinUrl: formData.linkedinUrl || null,
-        githubUrl: formData.githubUrl || null,
-        leetcodeUrl: formData.leetcodeUrl || null,
-        portfolioUrl: formData.portfolioUrl || null,
-        twitterUrl: formData.twitterUrl || null,
-        profilePicture: profilePictureUrl || null,
-        resumeUrl: resumeUrl || null,
-        resumeFileName: resumeFileName || null,
         education: formData.education || [],
+      }
+
+      // Only include optional fields if they have values
+      if (formData.age) profileData.age = formData.age
+      if (formData.dateOfBirth) profileData.dateOfBirth = formData.dateOfBirth
+      if (formData.address) profileData.address = formData.address
+      if (formData.city) profileData.city = formData.city
+      if (formData.state) profileData.state = formData.state
+      if (formData.country) profileData.country = formData.country
+      if (formData.phone) profileData.phone = formData.phone
+      if (formData.bio) profileData.bio = formData.bio
+      if (formData.currentRole) profileData.currentRole = formData.currentRole
+      if (formData.experience) profileData.experience = formData.experience
+      if (formData.linkedinUrl) profileData.linkedinUrl = formData.linkedinUrl
+      if (formData.githubUrl) profileData.githubUrl = formData.githubUrl
+      if (formData.leetcodeUrl) profileData.leetcodeUrl = formData.leetcodeUrl
+      if (formData.portfolioUrl) profileData.portfolioUrl = formData.portfolioUrl
+      if (formData.twitterUrl) profileData.twitterUrl = formData.twitterUrl
+
+      // Only update files if new ones were uploaded
+      if (profilePictureUrl) profileData.profilePicture = profilePictureUrl
+      if (resumeUrl) {
+        profileData.resumeUrl = resumeUrl
+        profileData.resumeFileName = resumeFileName
       }
 
       console.log("💾 Saving profile data:", profileData)
 
+      // Use PUT for editing, POST for creating
+      const method = isEditing ? "PUT" : "POST"
       const response = await fetch("/api/profile", {
-        method: "POST",
+        method,
         headers: {
           "Content-Type": "application/json",
         },
@@ -184,13 +275,31 @@ export default function CreateProfile() {
     }
   }
 
+  // Show loading spinner while loading existing profile
+  if (isLoadingProfile) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading your profile...</p>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 py-8">
       <div className="container mx-auto px-4 max-w-4xl">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">Create Your Profile</h1>
-          <p className="text-gray-600">Let's build your professional profile step by step</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            {isEditing ? "Edit Your Profile" : "Create Your Profile"}
+          </h1>
+          <p className="text-gray-600">
+            {isEditing
+              ? "Update your professional profile information"
+              : "Let's build your professional profile step by step"}
+          </p>
         </div>
 
         {/* Progress Bar */}
@@ -246,7 +355,13 @@ export default function CreateProfile() {
               disabled={isLoading}
               className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white flex items-center"
             >
-              {isLoading ? "Creating Profile..." : "Complete Profile"}
+              {isLoading
+                ? isEditing
+                  ? "Updating Profile..."
+                  : "Creating Profile..."
+                : isEditing
+                  ? "Update Profile"
+                  : "Complete Profile"}
               <Check className="h-4 w-4 ml-2" />
             </Button>
           ) : (
