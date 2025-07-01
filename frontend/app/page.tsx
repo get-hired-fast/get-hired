@@ -93,17 +93,24 @@ export default function LandingPage() {
                 Dashboard
               </Link>
             )}
+            {isSignedIn && (
+              <Link href="/profile" className="text-gray-600 hover:text-blue-600 transition-colors">
+                Profile
+              </Link>
+            )}
           </nav>
           <div className="flex items-center space-x-4">
             {isSignedIn ? (
               <div className="flex items-center space-x-3">
                 <span className="text-sm text-gray-600 hidden sm:block">Welcome, {user?.firstName || "User"}!</span>
+                
                 <UserButton
                   appearance={{
                     elements: {
                       avatarBox: "h-8 w-8",
                     },
                   }}
+                  
                 />
               </div>
             ) : (
