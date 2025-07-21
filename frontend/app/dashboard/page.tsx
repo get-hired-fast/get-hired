@@ -7,10 +7,44 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Briefcase, Code, Trophy, Bell, Search, Plus, TrendingUp, Calendar, MapPin, Clock, User } from "lucide-react"
 import Link from "next/link"
+import { Value } from "@radix-ui/react-select"
 
 export default function Dashboard() {
   const { user } = useUser()
   const [hasProfile, setHasProfile] = useState<boolean | null>(null)
+  const [applications, setApplications] = useState([]);
+  const [loadingApps, setLoadingApps] = useState(true);
+  const [profile, setProfile] = useState(null);
+  const [saved,setSaved] = useState([])
+
+  useEffect(() => {
+    fetch("/api/saved-opportunities")
+    .then(res => res.json())
+    .then(setSaved)
+  }, [])
+
+  useEffect(() => {
+    fetch('/api/profile')
+    .then(res => res.json())
+    .then(setProfile)
+  }, [])
+
+  useEffect(() => {
+    const fetchApplications = async () => {
+      setLoadingApps(true);
+      try {
+        const res = await fetch('/api/applications');
+        if (res.ok) {
+          setApplications(await res.json());
+        }
+      } catch (e) {
+        console.error("Error fetching applications:", e);
+      } finally {
+        setLoadingApps(false);
+      }
+    }
+    fetchApplications();
+  }, []);
 
   useEffect(() => {
     const checkProfile = async () => {
@@ -32,6 +66,8 @@ export default function Dashboard() {
       checkProfile()
     }
   }, [user])
+
+  const interviewsScheduled = applications.filter((app: any) => app.interviewDate).length;
 
   const recentOpportunities = [
     {
@@ -61,10 +97,10 @@ export default function Dashboard() {
   ]
 
   const stats = [
-    { label: "Applications Sent", value: "12", icon: <Briefcase className="h-5 w-5" /> },
-    { label: "Interviews Scheduled", value: "3", icon: <Calendar className="h-5 w-5" /> },
-    { label: "Profile Views", value: "45", icon: <TrendingUp className="h-5 w-5" /> },
-    { label: "Saved Opportunities", value: "8", icon: <Bell className="h-5 w-5" /> },
+    { label: "Applications Sent", value: loadingApps ? "..." : applications.length, icon: <Briefcase className="h-5 w-5" /> },
+    { label: "Interviews Scheduled", value: loadingApps ? "..." : interviewsScheduled, icon: <Calendar className="h-5 w-5" /> },
+    { label: "Profile Views", value: (profile && "profileViews" in profile) ? (profile as any).profileViews : "...", icon: <TrendingUp className="h-5 w-5" /> },
+    { label: "Saved Opportunities", value: saved.length, icon: <Bell className="h-5 w-5" /> },
   ]
 
   if (hasProfile === null) {
@@ -100,6 +136,9 @@ export default function Dashboard() {
             </Link>
             <Link href="/profile" className="text-gray-600 hover:text-blue-600 transition-colors">
               Profile
+            </Link>
+            <Link href="/saved-opportunities" className="text-gray-600 hover:text-blue-600 transition-colors">
+              Saved Opportunities
             </Link>
           </nav>
         </div>

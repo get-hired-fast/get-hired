@@ -3,6 +3,7 @@
 
 generator client {
   provider = "prisma-client-js"
+  output = "../generated/client"
 }
 
 datasource db {
@@ -46,6 +47,7 @@ model UserProfile {
 
   // Profile Status
   isProfileComplete Boolean @default(false)
+  profileViews Int @default(0)
 
   // Timestamps
   createdAt DateTime @default(now())
@@ -98,7 +100,7 @@ model Application {
   // External links
   jobUrl       String?
   applicationUrl String?
-
+  interviewDate DateTime?
   // Timestamps
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -119,6 +121,7 @@ model SavedOpportunity {
   description String?
   requirements String?
   salary      String?
+  jobId       String
 
   // External links
   opportunityUrl String?

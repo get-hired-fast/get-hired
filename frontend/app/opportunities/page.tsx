@@ -1,21 +1,31 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Calendar } from "@/components/ui/calendar"
-import { CalendarIcon } from "@radix-ui/react-icons"
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover"
-import { cn } from "@/lib/utils"
-import { format } from "date-fns"
-import { Checkbox } from "@/components/ui/checkbox"
-import { Label } from "@/components/ui/label"
-import { Slider } from "@/components/ui/slider"
-import { useRouter } from "next/navigation"
-import { useSearchParams } from "next/navigation"
-import OpportunityDetailModal from "./components/opportunity-detail-modal"
-import { toast } from "sonner"
+import { useState, useEffect } from "react";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Calendar } from "@/components/ui/calendar";
+import { CalendarIcon } from "@radix-ui/react-icons";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
+import { format } from "date-fns";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
+import { Slider } from "@/components/ui/slider";
+import { useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
+import OpportunityDetailModal from "./components/opportunity-detail-modal";
+import { toast } from "sonner";
 
 const opportunitiesData = [
   {
@@ -26,7 +36,8 @@ const opportunitiesData = [
     location: "San Francisco, CA",
     salary: "$120,000 - $150,000",
     deadline: "2024-03-15",
-    description: "We are looking for a talented software engineer to join our team...",
+    description:
+      "We are looking for a talented software engineer to join our team...",
     skills: ["JavaScript", "React", "Node.js"],
   },
   {
@@ -37,7 +48,8 @@ const opportunitiesData = [
     location: "New York, NY",
     salary: "$110,000 - $140,000",
     deadline: "2024-03-20",
-    description: "Join our data science team and help us analyze large datasets...",
+    description:
+      "Join our data science team and help us analyze large datasets...",
     skills: ["Python", "Machine Learning", "SQL"],
   },
   {
@@ -48,7 +60,8 @@ const opportunitiesData = [
     location: "Remote",
     salary: "$60 - $80/hour",
     deadline: "2024-03-25",
-    description: "We need a creative UX designer to improve our user experience...",
+    description:
+      "We need a creative UX designer to improve our user experience...",
     skills: ["UI/UX", "Figma", "Adobe XD"],
   },
   {
@@ -59,7 +72,8 @@ const opportunitiesData = [
     location: "Chicago, IL",
     salary: "$90,000 - $120,000",
     deadline: "2024-03-30",
-    description: "Seeking a project manager to oversee our software development projects...",
+    description:
+      "Seeking a project manager to oversee our software development projects...",
     skills: ["Project Management", "Agile", "Scrum"],
   },
   {
@@ -70,7 +84,8 @@ const opportunitiesData = [
     location: "Los Angeles, CA",
     salary: "$70,000 - $90,000",
     deadline: "2024-04-05",
-    description: "We are hiring a marketing specialist to boost our online presence...",
+    description:
+      "We are hiring a marketing specialist to boost our online presence...",
     skills: ["Digital Marketing", "SEO", "Social Media"],
   },
   {
@@ -81,7 +96,8 @@ const opportunitiesData = [
     location: "Austin, TX",
     salary: "$100,000 - $130,000",
     deadline: "2024-04-10",
-    description: "Join our team as a Frontend Developer and build amazing user interfaces...",
+    description:
+      "Join our team as a Frontend Developer and build amazing user interfaces...",
     skills: ["HTML", "CSS", "React"],
   },
   {
@@ -92,7 +108,8 @@ const opportunitiesData = [
     location: "Seattle, WA",
     salary: "$110,000 - $140,000",
     deadline: "2024-04-15",
-    description: "We are looking for a Backend Developer to build and maintain our server-side logic...",
+    description:
+      "We are looking for a Backend Developer to build and maintain our server-side logic...",
     skills: ["Node.js", "Express", "MongoDB"],
   },
   {
@@ -103,7 +120,8 @@ const opportunitiesData = [
     location: "Miami, FL",
     salary: "$90,000 - $120,000",
     deadline: "2024-04-20",
-    description: "Join our team as a Mobile App Developer and build innovative mobile applications...",
+    description:
+      "Join our team as a Mobile App Developer and build innovative mobile applications...",
     skills: ["iOS", "Android", "React Native"],
   },
   {
@@ -114,7 +132,8 @@ const opportunitiesData = [
     location: "Denver, CO",
     salary: "$80,000 - $110,000",
     deadline: "2024-04-25",
-    description: "We are hiring a Data Analyst to analyze and interpret complex data sets...",
+    description:
+      "We are hiring a Data Analyst to analyze and interpret complex data sets...",
     skills: ["SQL", "Excel", "Tableau"],
   },
   {
@@ -125,10 +144,11 @@ const opportunitiesData = [
     location: "Washington, D.C.",
     salary: "$100,000 - $130,000",
     deadline: "2024-04-30",
-    description: "Join our team as a Cybersecurity Analyst and protect our systems from cyber threats...",
+    description:
+      "Join our team as a Cybersecurity Analyst and protect our systems from cyber threats...",
     skills: ["Cybersecurity", "Network Security", "Penetration Testing"],
   },
-]
+];
 
 const locations = [
   "San Francisco, CA",
@@ -141,86 +161,120 @@ const locations = [
   "Miami, FL",
   "Denver, CO",
   "Washington, D.C.",
-]
+];
 
-const jobTypes = ["Full-time", "Contract", "Part-time", "Internship"]
+const jobTypes = ["Full-time", "Contract", "Part-time", "Internship"];
+
+type SavedOpportunity = {
+  id: string; // DB id
+  jobId: string; // Opportunity id
+  title: string;
+  company: string;
+  type: string;
+  createdAt?: string;
+};
 
 const Page = () => {
-  const [search, setSearch] = useState("")
-  const [locationFilter, setLocationFilter] = useState("All Locations")
-  const [date, setDate] = useState<Date | undefined>(undefined)
-  const [isRemote, setIsRemote] = useState(false)
-  const [salaryRange, setSalaryRange] = useState<number[]>([0, 200000])
-  const [opportunities, setOpportunities] = useState(opportunitiesData)
-  const [savedOpportunities, setSavedOpportunities] = useState<string[]>([])
-  const router = useRouter()
-  const searchParams = useSearchParams()
+  const [search, setSearch] = useState("");
+  const [locationFilter, setLocationFilter] = useState("All Locations");
+  const [date, setDate] = useState<Date | undefined>(undefined);
+  const [isRemote, setIsRemote] = useState(false);
+  const [salaryRange, setSalaryRange] = useState<number[]>([0, 200000]);
+  const [opportunities, setOpportunities] = useState(opportunitiesData);
+  const [savedOpportunities, setSavedOpportunities] = useState<SavedOpportunity[]>([]); // Now stores full objects
+  const router = useRouter();
+  const searchParams = useSearchParams();
 
-  const [selectedOpportunity, setSelectedOpportunity] = useState<any>(null)
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [selectedOpportunity, setSelectedOpportunity] = useState<any>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
-    const saved = localStorage.getItem("savedOpportunities")
+    const saved = localStorage.getItem("savedOpportunities");
     if (saved) {
-      setSavedOpportunities(JSON.parse(saved))
+      setSavedOpportunities(JSON.parse(saved));
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
-    let filteredOpportunities = opportunitiesData
+    let filteredOpportunities = opportunitiesData;
 
     if (search) {
       filteredOpportunities = filteredOpportunities.filter((opportunity) =>
-        opportunity.title.toLowerCase().includes(search.toLowerCase()),
-      )
+        opportunity.title.toLowerCase().includes(search.toLowerCase())
+      );
     }
 
     if (locationFilter !== "All Locations") {
-      filteredOpportunities = filteredOpportunities.filter((opportunity) => opportunity.location === locationFilter)
+      filteredOpportunities = filteredOpportunities.filter(
+        (opportunity) => opportunity.location === locationFilter
+      );
     }
 
     if (date) {
       filteredOpportunities = filteredOpportunities.filter((opportunity) => {
-        const deadline = new Date(opportunity.deadline)
-        const selectedDate = new Date(date)
+        const deadline = new Date(opportunity.deadline);
+        const selectedDate = new Date(date);
         return (
           deadline.getFullYear() === selectedDate.getFullYear() &&
           deadline.getMonth() === selectedDate.getMonth() &&
           deadline.getDate() === selectedDate.getDate()
-        )
-      })
+        );
+      });
     }
 
     if (isRemote) {
-      filteredOpportunities = filteredOpportunities.filter((opportunity) => opportunity.location === "Remote")
+      filteredOpportunities = filteredOpportunities.filter(
+        (opportunity) => opportunity.location === "Remote"
+      );
     }
 
     filteredOpportunities = filteredOpportunities.filter((opportunity) => {
-      const salary = Number.parseInt(opportunity.salary.split(" - ")[1].replace(/[^0-9]/g, ""))
-      return salary >= salaryRange[0] && salary <= salaryRange[1]
-    })
+      const salary = Number.parseInt(
+        opportunity.salary.split(" - ")[1].replace(/[^0-9]/g, "")
+      );
+      return salary >= salaryRange[0] && salary <= salaryRange[1];
+    });
 
-    setOpportunities(filteredOpportunities)
-  }, [search, locationFilter, date, isRemote, salaryRange])
+    setOpportunities(filteredOpportunities);
+  }, [search, locationFilter, date, isRemote, salaryRange]);
 
-  const handleSaveOpportunity = (opportunityId: string) => {
-    let updatedSavedOpportunities = [...savedOpportunities]
-    if (savedOpportunities.includes(opportunityId)) {
-      updatedSavedOpportunities = savedOpportunities.filter((id) => id !== opportunityId)
-      toast.success("Opportunity removed from saved list!")
+  const handleSaveOpportunity = async (opportunity: any) => {
+    // Check if already saved (by jobId)
+    const savedOp = savedOpportunities.find((op: SavedOpportunity) => op.jobId === opportunity.id);
+
+    if (savedOp) {
+      // Remove from saved (DELETE request)
+      await fetch(`/api/saved-opportunities?id=${savedOp.id}`, {
+        method: "DELETE",
+      });
+      setSavedOpportunities(savedOpportunities.filter((op: SavedOpportunity) => op.jobId !== opportunity.id));
+      toast.success("Opportunity removed from saved list!");
     } else {
-      updatedSavedOpportunities = [...savedOpportunities, opportunityId]
-      toast.success("Opportunity saved successfully!")
+      // Save to backend (POST request)
+      const res = await fetch("/api/saved-opportunities", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobId: opportunity.id, // Map id to jobId
+          title: opportunity.title,
+          company: opportunity.company,
+          type: opportunity.type,
+        }),
+      });
+      if (res.ok) {
+        const saved = await res.json();
+        setSavedOpportunities([...savedOpportunities, saved]);
+        toast.success("Opportunity saved successfully!");
+      } else {
+        toast.error("Failed to save opportunity.");
+      }
     }
-
-    setSavedOpportunities(updatedSavedOpportunities)
-    localStorage.setItem("savedOpportunities", JSON.stringify(updatedSavedOpportunities))
-  }
+  };
 
   const handleViewDetails = (opportunity: any) => {
-    setSelectedOpportunity(opportunity)
-    setIsModalOpen(true)
-  }
+    setSelectedOpportunity(opportunity);
+    setIsModalOpen(true);
+  };
 
   const handleApply = async (opportunityId: string, coverLetter: string) => {
     try {
@@ -240,22 +294,24 @@ const Page = () => {
           salary: selectedOpportunity.salary,
           jobUrl: `#opportunity-${opportunityId}`,
         }),
-      })
+      });
 
       if (!response.ok) {
-        throw new Error("Failed to submit application")
+        throw new Error("Failed to submit application");
       }
 
-      console.log("Application submitted successfully")
+      console.log("Application submitted successfully");
     } catch (error) {
-      console.error("Error submitting application:", error)
-      throw error
+      console.error("Error submitting application:", error);
+      throw error;
     }
-  }
+  };
 
   return (
     <div className="container mx-auto py-10">
-      <h1 className="text-3xl font-bold text-center mb-8">Explore Opportunities</h1>
+      <h1 className="text-3xl font-bold text-center mb-8">
+        Explore Opportunities
+      </h1>
 
       {/* Search and Filter Section */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -284,7 +340,10 @@ const Page = () => {
           <PopoverTrigger asChild>
             <Button
               variant={"outline"}
-              className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !date && "text-muted-foreground"
+              )}
             >
               <CalendarIcon className="mr-2 h-4 w-4" />
               {date ? format(date, "PPP") : <span>Pick a date</span>}
@@ -295,7 +354,9 @@ const Page = () => {
               mode="single"
               selected={date}
               onSelect={setDate}
-              disabled={(date) => date > new Date() || date < new Date("2023-01-01")}
+              disabled={(date) =>
+                date > new Date() || date < new Date("2023-01-01")
+              }
               initialFocus
             />
           </PopoverContent>
@@ -305,7 +366,11 @@ const Page = () => {
       {/* Additional Filters */}
       <div className="flex items-center space-x-4 mb-8">
         <div className="flex items-center space-x-2">
-          <Checkbox id="remote" checked={isRemote} onCheckedChange={() => setIsRemote(!isRemote)} />
+          <Checkbox
+            id="remote"
+            checked={isRemote}
+            onCheckedChange={() => setIsRemote(!isRemote)}
+          />
           <Label htmlFor="remote">Remote Only</Label>
         </div>
 
@@ -331,19 +396,23 @@ const Page = () => {
           >
             <h2 className="text-xl font-semibold mb-2">{opportunity.title}</h2>
             <p className="text-gray-600 mb-2">
-              <span className="font-semibold">Company:</span> {opportunity.company}
+              <span className="font-semibold">Company:</span>{" "}
+              {opportunity.company}
             </p>
             <p className="text-gray-600 mb-2">
               <span className="font-semibold">Type:</span> {opportunity.type}
             </p>
             <p className="text-gray-600 mb-2">
-              <span className="font-semibold">Location:</span> {opportunity.location}
+              <span className="font-semibold">Location:</span>{" "}
+              {opportunity.location}
             </p>
             <p className="text-gray-600 mb-2">
-              <span className="font-semibold">Salary:</span> {opportunity.salary}
+              <span className="font-semibold">Salary:</span>{" "}
+              {opportunity.salary}
             </p>
             <p className="text-gray-600 mb-4">
-              <span className="font-semibold">Deadline:</span> {opportunity.deadline}
+              <span className="font-semibold">Deadline:</span>{" "}
+              {opportunity.deadline}
             </p>
             <div className="flex justify-between items-center">
               <Button
@@ -353,8 +422,14 @@ const Page = () => {
               >
                 View Details
               </Button>
-              <Button size="sm" variant="outline" onClick={() => handleSaveOpportunity(opportunity.id)}>
-                {savedOpportunities.includes(opportunity.id) ? "Unsave" : "Save"}
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={() => handleSaveOpportunity(opportunity)}
+              >
+                {savedOpportunities.some((op: SavedOpportunity) => op.jobId === opportunity.id)
+                  ? "Unsave"
+                  : "Save"}
               </Button>
             </div>
           </div>
@@ -368,10 +443,14 @@ const Page = () => {
         onClose={() => setIsModalOpen(false)}
         onApply={handleApply}
         onSave={handleSaveOpportunity}
-        isSaved={selectedOpportunity ? savedOpportunities.includes(selectedOpportunity.id) : false}
+        isSaved={
+          selectedOpportunity
+            ? savedOpportunities.some((op: SavedOpportunity) => op.jobId === selectedOpportunity.id)
+            : false
+        }
       />
     </div>
-  )
-}
+  );
+};
 
-export default Page
+export default Page;
