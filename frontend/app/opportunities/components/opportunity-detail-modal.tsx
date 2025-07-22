@@ -158,7 +158,7 @@ export default function OpportunityDetailModal({
             <div>
               <h3 className="text-lg font-semibold mb-3">Requirements</h3>
               <ul className="space-y-2">
-                {opportunity.requirements.map((req: string, index: number) => (
+                {opportunity?.requirements?.map((req: string, index: number) => (
                   <li key={index} className="flex items-start">
                     <CheckCircle className="h-5 w-5 text-green-500 mr-2 mt-0.5 flex-shrink-0" />
                     <span className="text-gray-700">{req}</span>
@@ -171,7 +171,7 @@ export default function OpportunityDetailModal({
             <div>
               <h3 className="text-lg font-semibold mb-3">Required Skills</h3>
               <div className="flex flex-wrap gap-2">
-                {opportunity.skills.map((skill: string, index: number) => (
+                {opportunity?.skills?.map((skill: string, index: number) => (
                   <Badge key={index} variant="outline">
                     {skill}
                   </Badge>
