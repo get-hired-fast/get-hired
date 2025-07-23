@@ -1,11 +1,20 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import SidebarFilters from "./components/SidebarFilters";
+import TopSearchBar from "./components/TopSearchBar";
+import OpportunityCard from "./components/OpportunityCard";
 
 const Page = () => {
   const [opportunities, setOpportunities] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [selectedOpportunity, setSelectedOpportunity] = useState<any>(null);
+  const [filters, setFilters] = useState({
+    title: "",
+    category: "",
+    location: "",
+    employmentTypes: [],
+    salaryType: [],
+  });
 
   useEffect(() => {
     async function fetchOpportunities() {
@@ -25,29 +34,33 @@ const Page = () => {
   }, []);
 
   return (
-    <div className="p-4 max-w-7xl mx-auto flex">
-      {/* Opportunities List */}
-      {loading ? (
-        <p>Loading...</p>
-      ) : (
-        <div>
-          {opportunities.length === 0 ? (
-            <p>No opportunities found.</p>
+    <div className="flex min-h-screen bg-gray-50">
+      <SidebarFilters
+        filters={filters} 
+        onChange={setFilters} 
+      />
+
+      <main className="flex-1 flex flex-col">
+        <TopSearchBar />
+        <div className="p-6">
+          {loading ? (
+            <p>Loading...</p>
           ) : (
-            opportunities.map((opportunity: any) => (
-              <div key={opportunity.id || opportunity.job_id}>
-                <h2>{opportunity.title || opportunity.job_title}</h2>
-                <p>{opportunity.company || opportunity.employer_name}</p>
-                <p>{opportunity.location || opportunity.job_city}</p>
-                <p>{opportunity.salary || opportunity.salary_range}</p>
-                <p>{opportunity.description}</p>
-                <p>{opportunity.requirements}</p>
-                <p>{opportunity.skills}</p>
-              </div>
-            ))
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {opportunities.length === 0 ? (
+                <p>No opportunities found.</p>
+              ) : (
+                opportunities.map((opportunity: any) => (
+                  <OpportunityCard
+                    key={opportunity.id || opportunity.job_id}
+                    opportunity={opportunity}
+                  />
+                ))
+              )}
+            </div>
           )}
         </div>
-      )}
+      </main>
     </div>
   );
 };
