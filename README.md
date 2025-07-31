@@ -220,13 +220,13 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 ## 📞 Support
 
 - **Documentation**: Check the [DATABASE_SETUP.md](frontend/DATABASE_SETUP.md) for detailed setup instructions
-- **Issues**: Report bugs and request features on [GitHub Issues](https://github.com/yourusername/get-hired/issues)
-- **Discussions**: Join the conversation on [GitHub Discussions](https://github.com/yourusername/get-hired/discussions)
+- **Issues**: Report bugs and request features on [GitHub Issues](https://github.com/anishvkalbhor/get-hired/issues)
+- **Discussions**: Join the conversation on [GitHub Discussions](https://github.com/anishvkalbhor/get-hired/discussions)
 
 ---
 
 **Made with ❤️ by the Helpr team**
 
-[![GitHub stars](https://img.shields.io/github/stars/yourusername/get-hired?style=social)](https://github.com/yourusername/get-hired)
-[![GitHub forks](https://img.shields.io/github/forks/yourusername/get-hired?style=social)](https://github.com/yourusername/get-hired)
-[![GitHub issues](https://img.shields.io/github/issues/yourusername/get-hired)](https://github.com/yourusername/get-hired/issues)
+[![GitHub stars](https://img.shields.io/github/stars/yourusername/get-hired?style=social)](https://github.com/anishvkalbhor/get-hired)
+[![GitHub forks](https://img.shields.io/github/forks/yourusername/get-hired?style=social)](https://github.com/anishvkalbhor/get-hired)
+[![GitHub issues](https://img.shields.io/github/issues/yourusername/get-hired)](https://github.com/anishvkalbhor/get-hired/issues)
