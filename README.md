@@ -1,4 +1,4 @@
-# 🚀 Helpr - AI-Powered Job Application Platform
+# get-hired# 🚀 Helpr - AI-Powered Job Application Platform
 
 [![Next.js](https://img.shields.io/badge/Next.js-15.3.4-black)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19.0.0-blue)](https://reactjs.org/)
